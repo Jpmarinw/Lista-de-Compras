@@ -21,28 +21,36 @@ class MainActivity : AppCompatActivity() {
         val editText = findViewById<EditText>(R.id.editTextText)
 
         button.setOnClickListener {
-            val itemName = editText.text.toString().trim()
 
-            if (itemName.isNotEmpty()) {
-                val item = ItemModel(name = itemName)
-                itemsAdapterr.addItem(item)
+            //Verifica se a caixa está vazia
+            if(editText.text.isEmpty()){
+                editText.error = "Preencha um valor!"
 
-                editText.text.clear()
-
-                editText.requestFocus()
-
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                //indica ao compilador que o return é especificamente pra uma listener do botão
+                return@setOnClickListener
             }
 
-            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            val itemName = editText.text.toString().trim()
+                val item = ItemModel(
+                    name = itemName,
+                    onRemove = {
+                        itemsAdapterr.removeItem(it)
+                    }
+                )
+                itemsAdapterr.addItem(item)
+            //Limpa a caixa assim que adiciona um item
+                editText.text.clear()
+
+            recyclerView.addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                         imm.hideSoftInputFromWindow(editText.windowToken, 0)
                     }
                 }
-            })
+            }
+            )
         }
     }
 }
